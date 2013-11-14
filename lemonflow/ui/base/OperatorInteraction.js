@@ -1,10 +1,11 @@
 var OperatorInteraction = (function () {
     function OperatorInteraction() {
+        this.group = null;
         this.active = true;
         this.doTween = false;
         this.sortByZ = false;
         this.tween = false;
-        this.group = null;
+        this.inFocus = false;
     }
     OperatorInteraction.prototype.setup = function (slots) {
         if (typeof slots === "undefined") { slots = null; }

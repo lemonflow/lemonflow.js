@@ -1,6 +1,6 @@
 class OperatorStates extends OperatorInteraction {
-    _active:boolean = false;
-    _eventTypes = [];
+    active:boolean = false;
+    eventTypes = [];
     _zbeData = {index:0,length:1};
     _lastEvent = null;
     
@@ -45,7 +45,7 @@ class OperatorStates extends OperatorInteraction {
         }
         types.sort(); //nice to have
         
-        this._eventTypes = types.filter(function(e, i:number, a:Array):boolean { return a.indexOf(e) == i; });
+        this.eventTypes = types.filter(function(e, i:number, a:Array):boolean { return a.indexOf(e) == i; });
 }
 
 processUserInput(e = null):void {

@@ -8,8 +8,8 @@ var OperatorStates = (function (_super) {
     __extends(OperatorStates, _super);
     function OperatorStates() {
         _super.call(this);
-        this._active = false;
-        this._eventTypes = [];
+        this.active = false;
+        this.eventTypes = [];
         this._zbeData = { index: 0, length: 1 };
         this._lastEvent = null;
         this._model = null;
@@ -47,7 +47,7 @@ var OperatorStates = (function (_super) {
         }
         types.sort();
 
-        this._eventTypes = types.filter(function (e, i, a) {
+        this.eventTypes = types.filter(function (e, i, a) {
             return a.indexOf(e) == i;
         });
     };
