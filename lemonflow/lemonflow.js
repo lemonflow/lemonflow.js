@@ -679,9 +679,6 @@ var OperatorInteraction = (function () {
 })();
 var OperatorStates = (function (_super) {
     __extends(OperatorStates, _super);
-    
-    var self = null;
-    
     function OperatorStates() {
         _super.call(this);
         this.active = false;
@@ -692,9 +689,10 @@ var OperatorStates = (function (_super) {
         this.flow = null;
         this._view = null;
         this.changeWatchers = [];
+        this.self = null;
     }
     OperatorStates.prototype.setup = function () {
-        self = this;
+        this.self = this;
 
         if (!this.flow)
             return;
@@ -718,8 +716,8 @@ var OperatorStates = (function (_super) {
     };
 
     OperatorStates.prototype.processUserInput = function (e) {
-        self.lastEvent = e;
-        self.update.call(self);
+        this.self.lastEvent = e;
+        this.self.update.call(this.self);
     };
 
     OperatorStates.prototype.update = function () {
