@@ -4,6 +4,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
+
 var OperatorStates = (function (_super) {
     __extends(OperatorStates, _super);
     function OperatorStates() {
@@ -15,6 +16,7 @@ var OperatorStates = (function (_super) {
         this._model = null;
         this._context = null;
     }
+    
     OperatorStates.prototype.setup = function (slots) {
         if (typeof slots === "undefined") { slots = null; }
         if (!this.hasOwnProperty("model"))
