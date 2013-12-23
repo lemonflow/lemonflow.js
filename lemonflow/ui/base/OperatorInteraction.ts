@@ -7,7 +7,7 @@ class OperatorInteraction {
     inFocus:boolean = false;
     
     constructor() {}
-    setup(slots = null):void {}
-    update(slots = null, currentIdx:Number = 0, nextIndex:Number = 0):void {}
-    processUserInput(e = null):void {}
+    setup():void {}
+    update():void {}
+    processUserInput(e):void {}
 }
