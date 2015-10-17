@@ -171,7 +171,7 @@ var EventDispatcher = (function () {
         if (arr) {
             this.removeEventListener(type, listener, useCapture);
         }
-        arr = listeners[type];
+        arr = listeners[type]; // remove may have deleted the array
         if (!arr) {
             listeners[type] = [listener];
         } else {
@@ -281,7 +281,7 @@ var EventDispatcher = (function () {
             eventObj.currentTarget = this;
             eventObj.eventPhase = eventPhase;
             eventObj.removed = false;
-            arr = arr.slice();
+            arr = arr.slice(); // to avoid issues with items being removed or added during the dispatch
             for (var i = 0; i < l && !eventObj.immediatePropagationStopped; i++) {
                 var o = arr[i];
                 if (o.handleEvent) {
@@ -317,20 +317,15 @@ var InputEvent = (function (_super) {
 /*
 Copyright (c) 2006-2011, Philipp Fischer & Andreas Nuernberger
 All rights reserved.
-
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-
 * Redistributions of source code must retain the above copyright notice, this
 list of conditions and the following disclaimer.
-
 * Redistributions in binary form must reproduce the above copyright notice,
 this list of conditions and the following disclaimer in the documentation
 and/or other materials provided with the distribution.
-
 * The name Philipp Fischer or Andreas Nuernberger may not be used to endorse or promote products
 derived from this software without specific prior written permission.
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -359,9 +354,9 @@ var InputManager = (function (_super) {
     __extends(InputManager, _super);
     function InputManager() {
         _super.call(this);
-        this.inputStateStack = new Array();
+        this.inputStateStack = [];
         this.lastEvent = "";
-        this.activeConnectors = new Array();
+        this.activeConnectors = [];
         InputManager._instance = this;
     }
     InputManager.getInstance = function () {
@@ -409,20 +404,15 @@ var InputManager = (function (_super) {
 /*
 Copyright (c) 2006-2011, Philipp Fischer & Andreas Nuernberger
 All rights reserved.
-
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-
 * Redistributions of source code must retain the above copyright notice, this
 list of conditions and the following disclaimer.
-
 * Redistributions in binary form must reproduce the above copyright notice,
 this list of conditions and the following disclaimer in the documentation
 and/or other materials provided with the distribution.
-
 * The name Philipp Fischer or Andreas Nuernberger may not be used to endorse or promote products
 derived from this software without specific prior written permission.
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -497,20 +487,15 @@ var FocusModel = (function () {
 /*
 Copyright (c) 2006-2011, Philipp Fischer & Andreas Nuernberger
 All rights reserved.
-
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-
 * Redistributions of source code must retain the above copyright notice, this
 list of conditions and the following disclaimer.
-
 * Redistributions in binary form must reproduce the above copyright notice,
 this list of conditions and the following disclaimer in the documentation
 and/or other materials provided with the distribution.
-
 * The name Philipp Fischer or Andreas Nuernberger may not be used to endorse or promote products
 derived from this software without specific prior written permission.
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -629,37 +614,6 @@ var InteractionState = (function () {
     };
     return InteractionState;
 })();
-var VisualItem = (function () {
-    function VisualItem() {
-        this.x = 0;
-        this.y = 0;
-        this.z = 0;
-        this.alpha = 1;
-        this.visible = true;
-        this.rotationX = 0;
-        this.rotationY = 0;
-        this.rotationZ = 0;
-        this.scaleX = 1;
-        this.scaleY = 1;
-        this.data = new Object();
-        this.render = null;
-        this.factory = null;
-        this._renderer = null;
-    }
-    VisualItem.prototype.set_renderer = function (r) {
-        this._renderer = r;
-        this.dirty();
-    };
-
-    VisualItem.prototype.dirty = function () {
-    };
-    VisualItem.prototype.commitChanges = function () {
-        //			if (_dirty != DIRTY) return;
-        //			_dirty = VISIT;
-        //			render();
-    };
-    return VisualItem;
-})();
 var OperatorInteraction = (function () {
     function OperatorInteraction() {
         this.group = null;
@@ -679,9 +633,6 @@ var OperatorInteraction = (function () {
 })();
 var OperatorStates = (function (_super) {
     __extends(OperatorStates, _super);
-    
-    var self = null;
-    
     function OperatorStates() {
         _super.call(this);
         this.active = false;
@@ -692,10 +643,10 @@ var OperatorStates = (function (_super) {
         this.flow = null;
         this._view = null;
         this.changeWatchers = [];
-        
+        this.self = null;
     }
     OperatorStates.prototype.setup = function () {
-        self = this;
+        this.self = this;
 
         if (!this.flow)
             return;
@@ -719,8 +670,8 @@ var OperatorStates = (function (_super) {
     };
 
     OperatorStates.prototype.processUserInput = function (e) {
-        self.lastEvent = e;
-        self.update.call(self);
+        this.self.lastEvent = e;
+        this.self.update.call(this.self);
     };
 
     OperatorStates.prototype.update = function () {
@@ -822,3 +773,183 @@ var OperatorStates = (function (_super) {
     });
     return OperatorStates;
 })(OperatorInteraction);
+var VisualItem = (function () {
+    function VisualItem() {
+        this.x = 0;
+        this.y = 0;
+        this.z = 0;
+        this.alpha = 1;
+        this.visible = true;
+        this.rotationX = 0;
+        this.rotationY = 0;
+        this.rotationZ = 0;
+        this.scaleX = 1;
+        this.scaleY = 1;
+        this.data = new Object();
+        this.render = null;
+        this.factory = null;
+        this._renderer = null;
+    }
+    VisualItem.prototype.set_renderer = function (r) {
+        this._renderer = r;
+        this.dirty();
+    };
+
+    VisualItem.prototype.dirty = function () {
+    };
+    VisualItem.prototype.commitChanges = function () {
+        //			if (_dirty != DIRTY) return;
+        //			_dirty = VISIT;
+        //			render();
+    };
+    return VisualItem;
+})();
+var GroupRenderer_ThreejsWebGl = (function () {
+    function GroupRenderer_ThreejsWebGl(surface, useParent) {
+        //ui-side
+        this.slots = [];
+        this.transitioner = -1;
+        this.rendererCanvas = null;
+        this.perspectiveTransform = { x: 400, y: 240, f: 60 };
+        //renderer-side
+        this.surfaces = [];
+        this.surfaceMaterials = [];
+        this.camera = null;
+        this.scene = null;
+        this.renderer = null;
+        this.lights = [];
+        //temrporary
+        this._texture = null;
+        this._material = null;
+        this._plane = null;
+        //check if THREE library is loaded
+        if (THREE == undefined)
+            return;
+        this.initSurface();
+    }
+    GroupRenderer_ThreejsWebGl.prototype.initSurface = function () {
+        this.renderer = new THREE.WebGLRenderer({ clearColor: 0x232329, clearAlpha: 1, antialias: true });
+        this.renderer.autoClear = false;
+        this.renderer.setSize(w, h);
+        document.getElementById('container').appendChild(this.renderer.domElement);
+
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 5000);
+        this.camera.position.x = 0;
+        this.camera.position.y = -700;
+        this.camera.position.z = 600;
+
+        this.lights.push(new THREE.DirectionalLight(0xffffff, 0.5));
+        this.lights[0].position.set(0, 5, 0);
+
+        this.scene = new THREE.Scene(); //WebGL Scee
+        this.scene.add(this.lights[0]);
+    };
+
+    GroupRenderer_ThreejsWebGl.prototype.newChild = function (factory) {
+        //renderer-side
+        //http://threejs.org/docs/#Reference/Core/Object3D
+        this._texture = THREE.ImageUtils.loadTexture(factory);
+        this._material = new THREE.MeshBasicMaterial({ map: this._texture, transparent: true });
+        this._plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 450), this._material);
+        this._plane.doubleSided = true;
+
+        //client-side
+        var vi = new VisualItem();
+        vi.render = this._plane;
+        vi.factory = factory;
+
+        this.slots.push(vi);
+        this.surfaces.push(this._plane);
+        this.surfaceMaterials.push(this._material);
+        return vi;
+    };
+
+    GroupRenderer_ThreejsWebGl.prototype.newChildList = function (factory, number) {
+        for (var i = 0; i < number; i++) {
+            this.newChild(factory);
+        }
+    };
+
+    GroupRenderer_ThreejsWebGl.prototype.update = function (slots) {
+        var values;
+        var child, childMat;
+        var i = 0;
+
+        for (i = 0; i < slots.length; i++) {
+            values = slots[i];
+            child = this.surfaces[i];
+            childMat = this.surfaceMaterials[i];
+
+            if (this.transitioner == -1) {
+                child.position.x = values.x;
+                child.position.y = values.y;
+                child.position.z = values.z;
+                childMat.opacity = values.alpha;
+                child.visible = values.visible;
+                child.rotation.x = values.rotationX;
+                child.rotation.y = values.rotationY;
+                child.rotation.z = values.rotationZ;
+                child.scale.x = values.scaleX;
+                child.scale.y = values.scaleY;
+            }
+            //            if(transitioner >=0) {
+            //                TweenMax.to(child, transitioner, {
+            //                    x:values.x,
+            //                    y:values.y,
+            //                    z:values.z,
+            //                    alpha:values.alpha,
+            //                    visible:values.visible,
+            //                    rotationY:values.rotationY,
+            //                    rotationX:values.rotationX,
+            //                    rotationZ:values.rotationZ,
+            //                    scale.x:values.scaleX,
+            //                    scale.y:values.scaleY,
+            //                    ease:Quad.easeInOut
+            //                });
+            //            }
+        }
+    };
+    return GroupRenderer_ThreejsWebGl;
+})();
+;
+var ItemRenderer_ThreeWebGl = (function () {
+    function ItemRenderer_ThreeWebGl(surface, factory) {
+        this.transitioner = -1;
+        this.nativeObject = null;
+        this.nativeObjectMat = null;
+        this.visualItem = null;
+        this.factory = "";
+        //temporary
+        this._texture = null;
+        this.setup(surface);
+        this.update(this.visualItem);
+    }
+    ItemRenderer_ThreeWebGl.prototype.setup = function (factory) {
+        //renderer-side  -  http://threejs.org/docs/#Reference/Core/Object3D
+        this._texture = THREE.ImageUtils.loadTexture(factory);
+        this.nativeObjectMat = new THREE.MeshBasicMaterial({ map: this._texture, transparent: true });
+        this.nativeObject = new THREE.Mesh(new THREE.PlaneGeometry(1000, 450), this.nativeObjectMat);
+        this.nativeObject.doubleSided = true;
+
+        //client-side
+        this.visualItem = new VisualItem();
+        this.visualItem.render = this.nativeObject;
+        this.visualItem.factory = factory;
+    };
+
+    ItemRenderer_ThreeWebGl.prototype.update = function (values) {
+        if (this.transitioner == -1) {
+            this.nativeObject.position.x = values.x;
+            this.nativeObject.position.y = values.y;
+            this.nativeObject.position.z = values.z;
+            this.nativeObjectMat.opacity = values.alpha;
+            this.nativeObject.visible = values.visible;
+            this.nativeObject.rotation.x = values.rotationX;
+            this.nativeObject.rotation.y = values.rotationY;
+            this.nativeObject.rotation.z = values.rotationZ;
+            this.nativeObject.scale.x = values.scaleX;
+            this.nativeObject.scale.y = values.scaleY;
+        }
+    };
+    return ItemRenderer_ThreeWebGl;
+})();

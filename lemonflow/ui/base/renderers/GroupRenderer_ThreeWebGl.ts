@@ -5,14 +5,16 @@ class GroupRenderer_ThreejsWebGl {
     transitioner            = -1;
     rendererCanvas          = null;
     perspectiveTransform	= {x:400, y:240, f:60};
-
+    
     //renderer-side
-    surfaces    = [];
+    surfaces            = [];
+    surfaceMaterials    = [];
+    
     camera      = null;
     scene       = null;
     renderer    = null;
     lights      = [];
-   
+    
     //temrporary
     _texture    = null; 
     _material   = null;
@@ -22,82 +24,91 @@ class GroupRenderer_ThreejsWebGl {
 
     constructor(surface, useParent) {
         //check if THREE library is loaded
-        if(THREE = undefined) return;
-        initSurface();
+        if(THREE == undefined) return;
+        this.initSurface();
     }
 
     initSurface() {
-        renderer = new THREE.WebGLRenderer({ clearColor: 0x232329, clearAlpha: 1, antialias: true });
-        renderer.autoClear = false;
-        renderer.setSize(w, h);
-        document.getElementById( 'container' ).appendChild( renderer.domElement );
+        this.renderer = new THREE.WebGLRenderer({ clearColor: 0x232329, clearAlpha: 1, antialias: true });
+        this.renderer.autoClear = false;
+        this.renderer.setSize(w, h);
+        document.getElementById( 'container' ).appendChild( this.renderer.domElement );
 
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 5000);
-        camera.position.x = 0; camera.position.y = -700; camera.position.z = 600;
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 5000);
+        this.camera.position.x = 0; this.camera.position.y = -700; this.camera.position.z = 600;
         
-        lights.push(new THREE.DirectionalLight(0xffffff, 0.5));
-        lights[0].position.set(0, 5, 0);
+        this.lights.push(new THREE.DirectionalLight(0xffffff, 0.5));
+        this.lights[0].position.set(0, 5, 0);
     
-        scene = new THREE.Scene(); //WebGL Scee
-        scene.add(lights[0]);
+        this.scene = new THREE.Scene(); //WebGL Scee
+        this.scene.add(this.lights[0]);
     }
     
     
     newChild(factory):VisualItem { //factory is the path to the bitmap
         //renderer-side
-        _texture = THREE.ImageUtils.loadTexture(factory);
-        _material = new THREE.MeshBasicMaterial({ map : texture, transparent:true });
-        _plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 450), material);
-        _plane.doubleSided = true;      
+        //http://threejs.org/docs/#Reference/Core/Object3D
+        this._texture = THREE.ImageUtils.loadTexture(factory);
+        this._material = new THREE.MeshBasicMaterial({ map : this._texture, transparent:true });
+        this._plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 450), this._material);
+        this._plane.doubleSided = true;      
         
         //client-side
         var vi:VisualItem = new VisualItem();
-        vi.render = _plane;
-        slots.push(vi); 
+        vi.render = this._plane;
+        vi.factory = factory;
+        
+        this.slots.push(vi); 
+        this.surfaces.push(this._plane);
+        this.surfaceMaterials.push(this._material);
         return vi;
     }
     
-    newChildList(factory:IFactory, number:int):void {
-        for(var i:Number=0; i<number; i++) {
-            newChild(factory);
+    newChildList(factory, number):void {
+        for(var i=0; i<number; i++) {
+            this.newChild(factory);
         }
     }
     
     update(slots):void {
         var values:VisualItem;
-        var child:DisplayObject;
-        var i:int = 0;
+        var child, childMat;
+        var i = 0;
         
         
         for(i=0; i< slots.length; i++) {
             values = slots[i];
-            child = childRenderers[i];
-            if(transitioner == -1) {
-                child.x = values.x;
-                child.y = values.y;
-                child.z = values.z;
-                child.alpha = values.alpha;
+            child = this.surfaces[i];
+            childMat = this.surfaceMaterials[i];
+            
+            if(this.transitioner == -1) {
+                child.position.x = values.x;
+                child.position.y = values.y;
+                child.position.z = values.z;
+                childMat.opacity = values.alpha;
                 child.visible = values.visible;
-                child.rotationY = values.rotationY;
-                child.rotationX = values.rotationX;
-                child.rotationZ = values.rotationZ;
-                child.scaleX = values.scaleX;
-                child.scaleY = values.scaleY;
-            } else {
-                TweenMax.to(child, transitioner, { 
-                    x:values.x, 
-                    y:values.y, 
-                    z:values.z, 
-                    alpha:values.alpha, 
-                    visible:values.visible, 
-                    rotationY:values.rotationY, 
-                    rotationX:values.rotationX, 
-                    rotationZ:values.rotationZ, 
-                    scaleX:values.scaleX, 
-                    scaleY:values.scaleY, 
-                    ease:Quad.easeInOut
-                });
-            }
+                child.rotation.x = values.rotationX;
+                child.rotation.y = values.rotationY;
+                child.rotation.z = values.rotationZ;
+                child.scale.x = values.scaleX;
+                child.scale.y = values.scaleY;
+            } 
+            
+//            if(transitioner >=0) {
+//                TweenMax.to(child, transitioner, { 
+//                    x:values.x, 
+//                    y:values.y, 
+//                    z:values.z, 
+//                    alpha:values.alpha, 
+//                    visible:values.visible, 
+//                    rotationY:values.rotationY, 
+//                    rotationX:values.rotationX, 
+//                    rotationZ:values.rotationZ, 
+//                    scale.x:values.scaleX, 
+//                    scale.y:values.scaleY, 
+//                    ease:Quad.easeInOut
+//                });
+//            }
         }
     }
 };

@@ -45,9 +45,9 @@ modification, are permitted provided that the following conditions are met:
 
 class InputManager extends EventDispatcher{
     
-    inputStateStack:Array = new Array();
-    lastEvent:String = "";
-    activeConnectors:Array = new Array();
+    inputStateStack = [];
+    lastEvent:string = "";
+    activeConnectors = [];
     
     private static _instance:InputManager = null;
     constructor() { super(); InputManager._instance = this; }
